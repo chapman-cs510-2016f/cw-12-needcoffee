@@ -1,8 +1,11 @@
 #include <iostream>
+#include <limits>
 #include "stack.h"
 
-// TODO: Implementation of print for SValue
-// void print(SValue) {}
+void print(SValue val)
+{
+    std::cout << val << std::endl;
+}
 
 // Implementation of default constructor
 Stack::Stack()
@@ -30,6 +33,11 @@ std::size_t Stack::size() const
 // Implementation of push method
 void Stack::push(SValue val)
 {
+    // Use the full method to check whether Stack is full
+    if (this->full())
+    {
+        throw "Stack is full: cannot push.";
+    }
     // Create a unique_ptr named "new_node_ptr" to manage memory
     // First create a pointer to a zero-allocated Node struct using
     // the "new" keyword. See following equivalence: 
@@ -65,6 +73,7 @@ void Stack::push(SValue val)
     // automatically deallocated, since it is a unique_ptr
     // Again, we must move the new pointer uniquely to become the new head
     this->head = std::move(new_node_ptr);
+    this->depth++;
 }
 
 
@@ -74,9 +83,7 @@ SValue Stack::pop()
     // Use the empty method to check whether Stack is empty
     if (this->empty())
     {
-        // TODO: Fix this by throwing an exception properly
-        // https://www.tutorialspoint.com/cplusplus/cpp_exceptions_handling.htm
-        return -1;
+        throw "Stack is empty: nothing to pop."; 
     }
 
     SValue val = this->head->data;
@@ -84,13 +91,42 @@ SValue Stack::pop()
     this->head = std::move(this->head->next);
     // Again, we allow the unique_ptr to the old head to be deallocated
     // automatically as it goes out of scope 
+    this->depth--;
     return val;
 }
 
 
-// TODO: Implementation of empty method
-// bool Stack::empty() const {}
+//Implementation of empty method
+bool Stack::empty() const 
+{
+    if (this->depth)
+        return false;
+    else
+        return true;
+}
 
 
-// TODO: Implementation of print method
-// void Stack::print() {}
+//Implementation of print method
+void Stack::print() const
+{
+    Node *tempNode = this->head.get();
+    while (tempNode)
+    {
+        ::print(tempNode->data);
+        tempNode = tempNode->next.get();
+    }
+}
+
+bool Stack::full() const
+{
+    //got the idea below from http://en.cppreference.com/w/cpp/types/numeric_limits/max
+    if (this->depth == std::numeric_limits<SValue>::max())
+        return true;
+    else
+        return false;
+}
+
+
+
+
+
